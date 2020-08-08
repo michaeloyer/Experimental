@@ -1,83 +1,57 @@
 ﻿module Hangman
 
-type Outcome = 
-    | Vicotry
-    | Defeat
+open System
 
-type Challenge(letters: char seq) =
-    let mutable letters = letters
-    let mutable guess = Seq.map (fun _ -> '_') letters |> Seq.toArray
-    member _.Letters with get() = letters 
-    member _.Guess with get() = guess and set(value) = guess <- value
-    member _.GuessLetter c = 
-        let hits = letters 
-                |> Seq.mapi (fun index letter -> index,letter)
-                |> Seq.filter (fun t -> (snd t) = c)
-        hits |> Seq.iter (fun (index,char) -> guess.[index] <- char)
-        hits |> Seq.length
+type Correct = { hitCount: int }
+type Answer = { answer: string }
+type Invalid = { message: string }
 
+type Outcome =
+    | Correct of Correct
+    | Incorrect
+    | Victory of Answer
+    | Defeat of Answer
+    | Invalid of Invalid
 
-type Hangman(word) =
-    let challenge = Challenge("test")
-    let mutable chances = 5
+type Hangman (words, chances) =
+    let random = System.Random()
+    let answer = 
+        words 
+        |> Array.length 
+        |> random.Next 
+        |> Array.get words
+    let mutable status = Array.create (String.length answer) '_' 
+    let mutable guesses = Set.empty
+    let mutable chances = chances
+
+    member this.Guesses with get() = guesses
+    member this.Status with get() = status
     member this.Chances with get() = chances
-    member this.Answer with get() = challenge.Letters
-    member this.Solved with get() = Seq.forall (fun c -> c <> '_') challenge.Guess
 
-    member this.Guess() =
-        printfn "Enter a letter to guess (%i guesses left)" chances
-        let rec UserGuess() = 
-            let userGuess = System.Console.ReadKey().KeyChar 
-            printfn ""
-            match userGuess with
-                | char when System.Char.IsLetter(char) -> System.Char.Parse(char.ToString().ToLower())
-                | char -> 
-                    printfn ""
-                    printfn "'%c' is an invalid character. Please enter a letter" char
-                    UserGuess()
-
-        let guess = UserGuess()
-
-
-        match challenge.GuessLetter guess with
-            | 0 -> 
-                printfn "Incorrect guess! There is no '%c'" guess
-            | count -> match count with 
-                        | 1 ->
-                            printfn "Correct! There is 1 '%c'" guess
-                        | count ->
-                            printfn "Correct! There are %i '%c'" count guess 
-
-        chances <- chances - 1 
-
-        if this.Solved then 
-            Some(Vicotry)
-        elif chances = 0 then 
-            Some(Defeat)
-        else 
-            None
-
-    member _.ShowAnswer() = 
-         String.concat " " (Seq.map string challenge.Guess) |> printfn "%s"
-
-    static member Start() : Outcome = 
-        let words = Hangman.LookupWords()
-        let GetRandomWord() = 
-            words |> 
-            Array.length |> 
-            System.Random().Next |>
-            Array.get words
+    member this.Guess character =
+        if not << Char.IsLetter <| character 
+            then Invalid { message = sprintf "'%c' is an invalid character. Please enter a letter" character }
+        else
         
-        let hangman = Hangman(GetRandomWord())
-        let mutable outcome = None
+        let character = System.Char.Parse(character.ToString().ToLower())
+        if guesses.Contains(character)
+            then Invalid { message = sprintf "You already guessed '%c'" character }
+        else
 
-        while (Option.isNone(outcome)) do 
-            hangman.ShowAnswer()
-            outcome <- hangman.Guess()
-            printfn ""
+        guesses <- guesses.Add character
+        let hits = answer 
+                    |> Seq.indexed 
+                    |> Seq.filter (fun (_, char) -> char = character)
+                    |> Seq.toArray
+        hits |> Array.iter (fun (index,char) -> status.[index] <- char)
 
-        printfn "The word was '%s'" <| (Seq.map string >> String.concat "") hangman.Answer
-        Option.get <| outcome
-
-    static member private LookupWords() =
-        System.IO.File.ReadLines("HangmanWords.txt") |> Seq.toArray;
+        if status |> Array.forall (fun char -> char <> '_') 
+            then Victory { answer = answer }
+        elif hits |> Array.tryHead |> Option.isSome 
+            then Correct { hitCount = Array.length hits}
+        else
+            chances <- chances - 1
+            if chances = 0 
+                then Defeat { answer = answer }
+            else 
+                Incorrect
