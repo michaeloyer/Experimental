@@ -1,5 +1,6 @@
 ﻿open Hangman
 open System.IO
+open System
 
 [<EntryPoint>]
 let main _ =
@@ -20,6 +21,8 @@ let main _ =
         PrintStatus()
         let userGuess = System.Console.ReadKey().KeyChar
         printfn ""
+
+        Console.Clear()
 
         match hangman.Guess <| userGuess with
             | Invalid { message = message } -> 
