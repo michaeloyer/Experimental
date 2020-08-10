@@ -20,7 +20,7 @@ type Hangman (words, chances) =
         |> Array.length 
         |> random.Next 
         |> Array.get words
-    let mutable status = Array.create (String.length answer) '_' 
+    let status = Array.create (String.length answer) '_' 
     let mutable guesses = Set.empty
     let mutable chances = chances
 

@@ -21,17 +21,14 @@ let main _ =
         let userGuess = System.Console.ReadKey().KeyChar
         printfn ""
 
-
         match hangman.Guess <| userGuess with
             | Invalid { message = message } -> 
                 printfn "%s" message
                 guess()
             | Correct { hitCount = count } -> 
                 match count with
-                    | 1 -> 
-                        printfn "Correct! There is 1 '%c'" userGuess
-                    | _ -> 
-                        printfn "Correct! There are %i '%c'" count userGuess 
+                    | 1 -> printfn "Correct! There is 1 '%c'" userGuess
+                    | _ -> printfn "Correct! There are %i '%c'" count userGuess 
                 guess()
             | Incorrect ->
                 printfn "Sorry, '%c' was not found" userGuess
