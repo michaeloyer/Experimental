@@ -1,22 +1,20 @@
 ﻿[<EntryPoint>]
 let main _ =
     let rules = 
-        [
+        [|
             (3, "Fizz")
             (5, "Buzz")
-        ]
+        |]
 
     let fizzbuzz number = 
         rules
-        |> Seq.map (fun (divisor, word) -> if number % divisor = 0 then word else "")
-        |> String.concat ""
+        |> Array.choose (fun (divisor, word) -> if number % divisor = 0 then Some(word) else None)
         |> function
-            | "" -> string number
-            | value -> value
-
+            | [||] -> string number
+            | words -> String.concat "" words
+    
     { 1..100 } 
     |> Seq.map fizzbuzz
-    |> String.concat "\n"
-    |> printfn "%s"
+    |> Seq.iter (printfn "%s")
 
     0
