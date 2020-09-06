@@ -1,5 +1,5 @@
 ﻿namespace Lib
 
 type SomeType() =
-    member _.None: int option = None
-    member _.Some = Some 1
+    member _.NoneVal: int option = None
+    member _.SomeVal = Some 1
