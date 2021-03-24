@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SignalR Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/msgpack5@3.6.1/dist/msgpack5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr-protocol-msgpack@5.0.4/dist/browser/signalr-protocol-msgpack.min.js"></script>
+</head>
+<body>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:3600/test")
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Information)
+        .withHubProtocol(new signalR.protocols.msgpack.MessagePackHubProtocol())
+        .build();
+
+    connection.start()
+
+    connection.on("ReceiveMessage", (message) => {
+        console.log(JSON.parse(message));
+    });
+</script>
+</body>
+</html>
