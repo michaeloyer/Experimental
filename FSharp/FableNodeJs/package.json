@@ -1,0 +1,18 @@
+{
+  "name": "fable-node-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/Program.js",
+  "scripts": {
+    "start": "node dist/Program.js",
+    "build": "fable-splitter src/Test.fsproj -o dist --commonjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fable-compiler": "^2.13.0",
+    "fable-splitter": "^2.2.1"
+  }
+}
