@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <!-- This Version should be set to only the Major.Minor version.
+         'dotnet pack' will automatically increment the build number -->
+    <Version>1.0</Version>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="!Exists($(NextVersionNumber))">
+    <!-- Default Value -->
+    <CurrentVersion>0.0</CurrentVersion>
+    <CurrentMajor>$([System.Version]::Parse($(CurrentVersion)).Major)</CurrentMajor>
+    <CurrentMinor>$([System.Version]::Parse($(CurrentVersion)).Minor)</CurrentMinor>
+    <CurrentBuild>$([System.Version]::Parse($(CurrentVersion)).Build)</CurrentBuild>
+    <NextBuild>$([MSBuild]::Add($(CurrentBuild), 1))</NextBuild>
+    <NextVersion>$(CurrentMajor).$(CurrentMinor).$(NextBuild)</NextVersion>
+    <Version Condition="$([MSBuild]::VersionGreaterThan($(NextVersion), $(Version)))">$(NextVersion)</Version>
+  </PropertyGroup>
+
+</Project>
